@@ -380,6 +380,7 @@ public class AuroraTestUtility {
         .build();
     final CreateClusterResponse cluster = dsqlClient.createCluster(request);
 
+    this.dbEngineDeployment = DatabaseEngineDeployment.DSQL;
     this.dbIdentifier = cluster.identifier();
 
     final WaiterResponse<GetClusterResponse> waiterResponse = dsqlClient.waiter().waitUntilClusterActive(
@@ -494,7 +495,12 @@ public class AuroraTestUtility {
    * Destroys all instances and clusters. Removes IP from EC2 whitelist.
    */
   public void deleteCluster() {
-    switch (this.dbEngineDeployment) {
+    final DatabaseEngineDeployment deployment = this.dbEngineDeployment;
+    if (deployment == null) {
+      throw new UnsupportedOperationException("DB engine deployment must be non-null");
+    }
+
+    switch (deployment) {
       case AURORA:
         this.deleteAuroraCluster();
         break;
