@@ -372,9 +372,6 @@ public class AuroraTestUtility {
    */
   public String createDsqlCluster(final String name) throws InterruptedException {
     final Map<String, String> tagMap = new HashMap<>();
-    // for (final Tag tag : this.getTags()) {
-    //   tagMap.put(tag.key(), tag.value());
-    // }
     tagMap.put("Name", name);
 
     final CreateClusterRequest request = CreateClusterRequest.builder()
