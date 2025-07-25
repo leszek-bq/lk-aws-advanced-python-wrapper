@@ -673,7 +673,6 @@ public class TestEnvironment implements AutoCloseable {
   private static void initDatabaseParams(TestEnvironment env) {
     
     final TestEnvironmentRequest request = env.info.getRequest();
-
     final boolean isDsql = (request.getDatabaseEngineDeployment() == DatabaseEngineDeployment.DSQL);
     
     final String dbName = isDsql
@@ -913,10 +912,15 @@ public class TestEnvironment implements AutoCloseable {
           env.info.getRequest().getDatabaseEngineDeployment().toString());
     }
 
+    final TestEnvironmentRequest request = env.info.getRequest();
+    final boolean isDsql = (request.getDatabaseEngineDeployment() == DatabaseEngineDeployment.DSQL);
+
     env.info.setIamUsername(
-        !StringUtils.isNullOrEmpty(config.iamUser)
-            ? config.iamUser
-            : "jane_doe");
+            isDsql
+              ? "admin"
+              : !StringUtils.isNullOrEmpty(config.iamUser)
+                ? config.iamUser
+                : "jane_doe");
 
     if (!env.reuseAuroraDbCluster) {
       try {
