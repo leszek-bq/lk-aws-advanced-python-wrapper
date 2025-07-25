@@ -490,7 +490,9 @@ public class TestEnvironment implements AutoCloseable {
       final String identifier = env.auroraUtil.getDsqlInstanceId(endpoint);
       if (!env.auroraUtil.doesDsqlClusterExist(identifier)) {
         throw new RuntimeException(
-            "It's requested to reuse existing DSQL cluster but it doesn't exist: " + endpoint);
+            String.format("It's requested to reuse existing DSQL cluster '%s' but it doesn't exist in region %s ",
+                endpoint,
+                env.info.getRegion()));
       }
 
       LOGGER.finer(
