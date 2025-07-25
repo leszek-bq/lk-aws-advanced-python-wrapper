@@ -23,7 +23,6 @@ from tests.integration.container.utils.test_environment_features import \
 
 if TYPE_CHECKING:
     from tests.integration.container.utils.test_driver import TestDriver
-    from tests.integration.container.utils.test_instance_info import TestInstanceInfo
 
 from socket import gethostbyname
 from typing import Callable
@@ -32,8 +31,7 @@ import pytest
 
 from aws_advanced_python_wrapper import AwsWrapperConnection
 from aws_advanced_python_wrapper.errors import AwsWrapperError
-from tests.integration.container.utils.conditions import (disable_on_features,
-                                                          enable_on_features)
+from tests.integration.container.utils.conditions import enable_on_features
 from tests.integration.container.utils.driver_helper import DriverHelper
 from tests.integration.container.utils.test_environment import TestEnvironment
 
@@ -58,13 +56,59 @@ class TestAwsIamDSQLAuthentication:
 
         return p
 
+    def test_iam_wrong_database_username(self, test_environment: TestEnvironment,
+                                         test_driver: TestDriver, conn_utils, props):
+        target_driver_connect = DriverHelper.get_connect_func(test_driver)
+        user = f"WRONG_{conn_utils.iam_user}_USER"
+        params = conn_utils.get_connect_params(user=user)
+        params.pop("use_pure", None)  # AWS tokens are truncated when using the pure Python MySQL driver
 
-    def test_hello(self, test_driver: TestDriver, conn_utils, props):
-        print("***Hello world DSQL ****")
+        with pytest.raises(AwsWrapperError):
+            AwsWrapperConnection.connect(
+                target_driver_connect,
+                **params,
+                plugins="iam_dsql",
+                **props)
 
-    
+    def test_iam_no_database_username(self, test_driver: TestDriver, conn_utils, props):
+        target_driver_connect = DriverHelper.get_connect_func(test_driver)
+        params = conn_utils.get_connect_params()
+        params.pop("use_pure", None)  # AWS tokens are truncated when using the pure Python MySQL driver
+        params.pop("user", None)
 
-    
+        with pytest.raises(AwsWrapperError):
+            AwsWrapperConnection.connect(target_driver_connect, **params, plugins="iam_dsql", **props)
+
+    def test_iam_invalid_host(self, test_driver: TestDriver, conn_utils, props):
+        target_driver_connect = DriverHelper.get_connect_func(test_driver)
+        params = conn_utils.get_connect_params()
+        params.pop("use_pure", None)  # AWS tokens are truncated when using the pure Python MySQL driver
+        params.update({"iam_host": "<>", "plugins": "iam_dsql"})
+
+        with pytest.raises(AwsWrapperError):
+            AwsWrapperConnection.connect(target_driver_connect, **params, **props)
+
+    def test_iam_valid_connection_properties(
+            self, test_environment: TestEnvironment, test_driver: TestDriver, conn_utils, props):
+        target_driver_connect = DriverHelper.get_connect_func(test_driver)
+        params = conn_utils.get_connect_params(user=conn_utils.iam_user, password="<anything>")
+        params.pop("use_pure", None)  # AWS tokens are truncated when using the pure Python MySQL driver
+        params["plugins"] = "iam_dsql"
+
+        self.validate_connection(target_driver_connect, **params, **props)
+
+    def test_iam_valid_connection_properties_no_password(
+            self, test_environment: TestEnvironment, test_driver: TestDriver, conn_utils, props):
+        target_driver_connect = DriverHelper.get_connect_func(test_driver)
+        params = conn_utils.get_connect_params(user=conn_utils.iam_user)
+        params.pop("use_pure", None)  # AWS tokens are truncated when using the pure Python MySQL driver
+        params.pop("password", None)
+        params["plugins"] = "iam_dsql"
+
+        self.validate_connection(target_driver_connect, **params, **props)
+
+    def get_ip_address(self, hostname: str):
+        return gethostbyname(hostname)
 
     def validate_connection(self, target_driver_connect: Callable, **connect_params):
         with AwsWrapperConnection.connect(target_driver_connect, **connect_params) as conn, \
