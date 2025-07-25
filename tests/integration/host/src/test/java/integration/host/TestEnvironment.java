@@ -922,7 +922,7 @@ public class TestEnvironment implements AutoCloseable {
                 ? config.iamUser
                 : "jane_doe");
 
-    if (!env.reuseAuroraDbCluster) {
+    if (!env.reuseAuroraDbCluster && !isDsql) {
       try {
         Class.forName(DriverHelper.getDriverClassname(env.info.getRequest().getDatabaseEngine()));
       } catch (ClassNotFoundException e) {
