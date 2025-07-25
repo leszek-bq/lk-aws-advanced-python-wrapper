@@ -342,8 +342,11 @@ public class TestEnvironment implements AutoCloseable {
     ArrayList<TestInstanceInfo> instances = new ArrayList<>();
 
     if (env.reuseAuroraDbCluster) {
+      if (StringUtils.isNullOrEmpty(env.auroraClusterName)) {
+        throw new RuntimeException("Environment variable RDS_CLUSTER_NAME is required.");
+      }
       if (StringUtils.isNullOrEmpty(env.auroraClusterDomain)) {
-        throw new RuntimeException("Environment variable AURORA_CLUSTER_DOMAIN is required.");
+        throw new RuntimeException("Environment variable RDS_CLUSTER_DOMAIN is required.");
       }
 
       if (!env.auroraUtil.doesClusterExist(env.auroraClusterName)) {
@@ -475,8 +478,11 @@ public class TestEnvironment implements AutoCloseable {
   
     final String endpoint;
     if (env.reuseAuroraDbCluster) {
+      if (StringUtils.isNullOrEmpty(env.auroraClusterName)) {
+        throw new RuntimeException("Environment variable RDS_CLUSTER_NAME is required.");
+      }
       if (StringUtils.isNullOrEmpty(env.auroraClusterDomain)) {
-        throw new RuntimeException("Environment variable AURORA_CLUSTER_DOMAIN is required.");
+        throw new RuntimeException("Environment variable RDS_CLUSTER_DOMAIN is required.");
       }
 
       endpoint = env.auroraClusterName + "." + env.auroraClusterDomain;
