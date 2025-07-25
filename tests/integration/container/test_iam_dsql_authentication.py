@@ -39,8 +39,6 @@ from tests.integration.container.utils.test_environment import TestEnvironment
 
 
 @enable_on_features([TestEnvironmentFeatures.RUN_DSQL_TESTS_ONLY])
-#  @disable_on_features([TestEnvironmentFeatures.RUN_AUTOSCALING_TESTS_ONLY,
-#                       TestEnvironmentFeatures.PERFORMANCE])
 class TestAwsIamDSQLAuthentication:
 
     @pytest.fixture(scope='class')
