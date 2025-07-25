@@ -614,6 +614,9 @@ public class AuroraTestUtility {
     }
 
     final Matcher matcher = AURORA_DSQL_CLUSTER_PATTERN.matcher(host);
+    if (!matcher.matches()) {
+      return null;
+    }
     return matcher.group("instance");
   }
 
