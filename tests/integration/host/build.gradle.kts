@@ -268,7 +268,6 @@ tasks.register<Test>("test-all-dsql") {
         systemProperty("exclude-mariadb-driver", "true")
         systemProperty("exclude-mariadb-engine", "true")
         systemProperty("exclude-performance", "true")
-        systemProperty("exclude-pg-driver", "true")
         systemProperty("exclude-secrets-manager", "true")
     }
 }
@@ -430,7 +429,6 @@ tasks.register<Test>("debug-all-dsql") {
         systemProperty("exclude-mariadb-driver", "true")
         systemProperty("exclude-mariadb-engine", "true")
         systemProperty("exclude-performance", "true")
-        systemProperty("exclude-pg-driver", "true")
         systemProperty("exclude-secrets-manager", "true")
     }
 }
