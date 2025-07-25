@@ -380,6 +380,8 @@ public class AuroraTestUtility {
         .build();
     final CreateClusterResponse cluster = dsqlClient.createCluster(request);
 
+    this.dbIdentifier = cluster.identifier();
+
     final WaiterResponse<GetClusterResponse> waiterResponse = dsqlClient.waiter().waitUntilClusterActive(
         getCluster -> getCluster.identifier(cluster.identifier()),
         config -> config.backoffStrategyV2(
@@ -388,7 +390,7 @@ public class AuroraTestUtility {
     );
 
     if (waiterResponse.matched().exception().isPresent()) {
-      deleteDsqlCluster(cluster.identifier(), false);
+      deleteCluster();
       throw new InterruptedException(
           "Unable to create DSQL cluster after waiting for 30 minutes");
     }
@@ -492,13 +494,15 @@ public class AuroraTestUtility {
    * Destroys all instances and clusters. Removes IP from EC2 whitelist.
    */
   public void deleteCluster() {
-
     switch (this.dbEngineDeployment) {
       case AURORA:
         this.deleteAuroraCluster();
         break;
       case RDS_MULTI_AZ:
         this.deleteMultiAzCluster();
+        break;
+      case DSQL:
+        this.deleteDsqlCluster();
         break;
       default:
         throw new UnsupportedOperationException(this.dbEngineDeployment.toString());
@@ -566,21 +570,19 @@ public class AuroraTestUtility {
     }
   }
 
-  public void deleteDsqlCluster(final String identifier, final boolean waitForCompletion) {
-    dsqlClient.deleteCluster(r -> r.identifier(identifier));
+  public void deleteDsqlCluster() {
+    dsqlClient.deleteCluster(r -> r.identifier(dbIdentifier));
 
-    if (waitForCompletion) {
-      WaiterResponse<GetClusterResponse> waiterResponse = dsqlClient.waiter().waitUntilClusterNotExists(
-          getCluster -> getCluster.identifier(identifier),
-          config -> config.backoffStrategyV2(
-              BackoffStrategy.fixedDelayWithoutJitter(Duration.ofSeconds(10))
-          ).waitTimeout(Duration.ofMinutes(30))
-      );
+    WaiterResponse<GetClusterResponse> waiterResponse = dsqlClient.waiter().waitUntilClusterNotExists(
+        getCluster -> getCluster.identifier(dbIdentifier),
+        config -> config.backoffStrategyV2(
+            BackoffStrategy.fixedDelayWithoutJitter(Duration.ofSeconds(10))
+        ).waitTimeout(Duration.ofMinutes(30))
+    );
 
-      if (waiterResponse.matched().exception().isPresent()) {
-        throw new RuntimeException(
-            "Unable to delete DSQL cluster after waiting for 30 minutes");
-      }
+    if (waiterResponse.matched().exception().isPresent()) {
+      throw new RuntimeException(
+          "Unable to delete DSQL cluster after waiting for 30 minutes");
     }
   }
 

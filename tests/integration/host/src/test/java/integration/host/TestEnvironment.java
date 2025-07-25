@@ -1025,6 +1025,7 @@ public class TestEnvironment implements AutoCloseable {
     switch (this.info.getRequest().getDatabaseEngineDeployment()) {
       case AURORA:
       case RDS_MULTI_AZ:
+      case DSQL:
         deleteDbCluster();
         break;
       case RDS:
@@ -1039,10 +1040,19 @@ public class TestEnvironment implements AutoCloseable {
       auroraUtil.ec2DeauthorizesIP(runnerIP);
     }
 
+    final DatabaseEngineDeployment deployment = this.info.getRequest().getDatabaseEngineDeployment();
+
+    final String identifier;
+    if (deployment == DatabaseEngineDeployment.DSQL) {
+      identifier = this.auroraClusterName;
+    } else {
+      identifier = this.auroraClusterName + ".cluster-" + this.auroraClusterDomain;
+    }
+
     if (!this.reuseAuroraDbCluster) {
-      LOGGER.finest("Deleting cluster " + this.auroraClusterName + ".cluster-" + this.auroraClusterDomain);
+      LOGGER.finest("Deleting cluster " + identifier);
       auroraUtil.deleteCluster(this.auroraClusterName);
-      LOGGER.finest("Deleted cluster " + this.auroraClusterName + ".cluster-" + this.auroraClusterDomain);
+      LOGGER.finest("Deleted cluster " + identifier);
     }
   }
 
