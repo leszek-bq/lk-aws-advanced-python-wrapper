@@ -451,6 +451,8 @@ public class TestEnvironment implements AutoCloseable {
 
   private static void createDsqlCluster(TestEnvironment env) throws URISyntaxException {
 
+    initAwsCredentials(env);
+
     env.info.setRegion(
         !StringUtils.isNullOrEmpty(config.rdsDbRegion)
             ? config.rdsDbRegion
