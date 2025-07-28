@@ -579,21 +579,17 @@ public class AuroraTestUtility {
   public void deleteDsqlCluster() {
     dsqlClient.deleteCluster(r -> r.identifier(dbIdentifier));
 
-    try {
-      WaiterResponse<GetClusterResponse> waiterResponse = dsqlClient.waiter().waitUntilClusterNotExists(
-          getCluster -> getCluster.identifier(dbIdentifier),
-          config -> config.backoffStrategyV2(
-              BackoffStrategy.fixedDelayWithoutJitter(Duration.ofSeconds(10))
-          ).waitTimeout(Duration.ofMinutes(30))
-      );
+    WaiterResponse<GetClusterResponse> waiterResponse = dsqlClient.waiter().waitUntilClusterNotExists(
+        getCluster -> getCluster.identifier(dbIdentifier),
+        config -> config.backoffStrategyV2(
+            BackoffStrategy.fixedDelayWithoutJitter(Duration.ofSeconds(10))
+        ).waitTimeout(Duration.ofMinutes(30))
+    );
 
-      if (waiterResponse.matched().exception().isPresent()) {
-        throw new RuntimeException(
-                "Unable to delete DSQL cluster after waiting for 30 minutes");
-      }
-    }
-    catch (final ResourceNotFoundException e) {
-      // Ignore. This may happen sometimes if the cluster is already gone when it is checked.
+    if (waiterResponse.matched().exception().isPresent()
+            && !(waiterResponse.matched().exception().get() instanceof ResourceNotFoundException)) {
+      throw new RuntimeException(
+              "Unable to delete DSQL cluster after waiting for 30 minutes");
     }
   }
 
