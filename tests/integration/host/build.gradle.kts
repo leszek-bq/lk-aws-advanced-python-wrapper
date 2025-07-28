@@ -120,6 +120,42 @@ tasks.register<Test>("test-python-3.8-pg") {
     }
 }
 
+tasks.register<Test>("test-python-3.11-dsql") {
+    group = "verification"
+    filter.includeTestsMatching("integration.host.TestRunner.runTests")
+    doFirst {
+        systemProperty("exclude-aurora", "true")
+        systemProperty("exclude-python-38", "true")
+        systemProperty("exclude-autoscaling", "true")
+        systemProperty("exclude-docker", "true")
+        systemProperty("exclude-multi-az", "true")
+        systemProperty("exclude-mysql-driver", "true")
+        systemProperty("exclude-mysql-engine", "true")
+        systemProperty("exclude-mariadb-driver", "true")
+        systemProperty("exclude-mariadb-engine", "true")
+        systemProperty("exclude-performance", "true")
+        systemProperty("exclude-secrets-manager", "true")
+    }
+}
+
+tasks.register<Test>("test-python-3.8-dsql") {
+    group = "verification"
+    filter.includeTestsMatching("integration.host.TestRunner.runTests")
+    doFirst {
+        systemProperty("exclude-aurora", "true")
+        systemProperty("exclude-python-311", "true")
+        systemProperty("exclude-autoscaling", "true")
+        systemProperty("exclude-docker", "true")
+        systemProperty("exclude-multi-az", "true")
+        systemProperty("exclude-mysql-driver", "true")
+        systemProperty("exclude-mysql-engine", "true")
+        systemProperty("exclude-mariadb-driver", "true")
+        systemProperty("exclude-mariadb-engine", "true")
+        systemProperty("exclude-performance", "true")
+        systemProperty("exclude-secrets-manager", "true")
+    }
+}
+
 tasks.register<Test>("test-docker") {
     group = "verification"
     filter.includeTestsMatching("integration.host.TestRunner.runTests")
